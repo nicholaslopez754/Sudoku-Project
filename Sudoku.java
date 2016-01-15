@@ -1,5 +1,5 @@
 /* Sudoku Game
- * Author: Nicholas Lopez
+ * Author: Nicholas Lopz
  * Date: 11/22/2015
  *
  * TODO:
