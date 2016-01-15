@@ -277,7 +277,7 @@ public class Sudoku {
    * By convention, the integers will range
    * from 1-9, while an empty space is denoted by a 0
    */
-  public boolean loadFromFile(File file, Sudoku game) {
+  public boolean loadFromFile(File file) {
     try {
       Scanner scanner = new Scanner(file);
       int temp;
@@ -292,7 +292,7 @@ public class Sudoku {
               return false;
             }
             else
-              game.setBoard(i, j, temp);
+              this.setBoard(i, j, temp);
           }
         }
       }
@@ -322,7 +322,7 @@ public class Sudoku {
     boolean loadSuccess;
 
     //Sets the boolean if load was successful
-    loadSuccess = game.loadFromFile(file, game);
+    loadSuccess = game.loadFromFile(file);
    
     //Only starts the game if loading the file was successful
     if( loadSuccess ) {
