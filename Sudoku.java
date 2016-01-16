@@ -58,9 +58,9 @@ public class Sudoku {
   public void setBoard(int row, int col, int in) {
     //char temp = intToChar(in);
     int temp;
-    if( fixed[row-1][col-1] == 0 ) {
-      numSet[theBoard[row-1][col-1]]--; 
-      theBoard[row-1][col-1] =  in;
+    if( fixed[row][col] == 0 ) { //Here
+      numSet[theBoard[row][col]]--; //Here
+      theBoard[row][col] =  in; //Here
       numSet[in]++;
       addToSet(row,col,in);
     }
@@ -80,8 +80,8 @@ public class Sudoku {
   //Checks the row for valid move
   public boolean checkRow(int row, int in) {
     for(int i = 0; i < numRows; i++) {
-      if( theBoard[row-1][i] == in ) {
-        System.out.println("Invalid move; input number exists in this row.");
+      if( theBoard[row][i] == in ) { //Here
+        //System.out.println("Invalid move; input number exists in this row.");
         return false;
       }
     }
@@ -91,8 +91,8 @@ public class Sudoku {
   //Checks the column for valid move
   public boolean checkColumn(int col, int in) {
     for(int i = 0; i < numCols; i++) {
-      if( theBoard[i][col-1] == in ) {
-        System.out.println("Invalid move; input number exists in this column");
+      if( theBoard[i][col] == in ) { //Here
+        //System.out.println("Invalid move; input number exists in this column");
         return false; 
       }
     }
@@ -148,8 +148,8 @@ public class Sudoku {
    * Returns true if it does not belong to its set 
    */
   public boolean checkSet(int row, int col, int in) {
-    row -= 1;
-    col -= 1;
+    //row -= 1;
+    //col -= 1;
     boolean flag = true;
     //Set 1
     if( 0 <= row && row < 3 && 0 <= col && col < 3) { 
@@ -197,8 +197,8 @@ public class Sudoku {
         flag = false;
     }
 
-    if( !flag )
-      System.out.println("Invalid move; input number exists in local block.");
+    //if( !flag )
+      //System.out.println("Invalid move; input number exists in local block.");
     return flag;
   }
 
@@ -212,8 +212,8 @@ public class Sudoku {
 
   //Adds the element to the proper set
   public void addToSet(int row, int col, int in) {
-    row -= 1;
-    col -= 1;
+    //row -= 1;
+    //col -= 1;
     //Set 1
     if( 0 <= row && row < 3 && 0 <= col && col < 3) { 
       if( theBoard[row][col] != 0 )
@@ -282,8 +282,8 @@ public class Sudoku {
       Scanner scanner = new Scanner(file);
       int temp;
       while(scanner.hasNextInt()) {
-        for(int i = 1; i < numRows+1; i++) {
-          for(int j = 1; j < numCols+1; j++) {
+        for(int i = 0; i < numRows; i++) {
+          for(int j = 0; j < numCols; j++) {
             temp = scanner.nextInt();
             if( temp < 0 || temp > 9 ) {
               System.out.println("\n\tFile must contain only integers ranging"
@@ -335,13 +335,13 @@ public class Sudoku {
       //Runs until the board is full with valid moves
       while(true) {
         System.out.println("Enter a row number (1-9)");
-        row = sc.nextInt();
-        if( row < 1 || row > 9 )
+        row = sc.nextInt()-1;
+        if( row < 0 || row > 8 )
           continue;
 
         System.out.println("Enter a column number (1-9)");
-        col = sc.nextInt();
-        if( col < 1 || col > 9 )
+        col = sc.nextInt()-1;
+        if( col < 0 || col > 8 )
           continue;
 
         System.out.println("Enter a number to place (1-9)");
@@ -357,8 +357,10 @@ public class Sudoku {
           if( game.isFull() )
              break;
         }
-        else 
+        else  
             game.printBoard();
+
+        game.toString();
       }
 
       //Time calculations
