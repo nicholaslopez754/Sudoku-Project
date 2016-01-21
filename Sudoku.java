@@ -68,6 +68,14 @@ public class Sudoku {
       System.out.println("Invalid move; this cell cannot be changed.");
   }
 
+  //Clears the cell in the board
+  public void clearCell(int row, int col) { 
+    if( fixed[row][col] == 0 && theBoard[row][col] != 0 ) {
+      numSet[theBoard[row][col]]--;
+      theBoard[row][col] = 0;
+    }
+  }
+
   //Checks if board is filled
   public boolean isFull() {
     //Checks the amount of empty spots
