@@ -22,16 +22,16 @@ public class SudokuSolver extends Sudoku {
     List<Integer> inputs;
     List<dEdge> edges;
 
-    boolean visited;
+    //boolean visited;
 
     public dNode( Coordinate coord, List<Integer> inList ) {
       c = coord; 
       inputs = inList;
-      visited = false;
+      //visited = false;
     }
 
     public void printContent() {
-      System.out.print("Node(" + (c.x+1) + ", " + (c.y+1) + ")");
+      System.out.print("Node(" + (c.x+1) + ", " + (c.y+1) + "): ");
       for( int i = 0; i < inputs.size(); i++ )
         System.out.print(inputs.get(i) + " ");
       System.out.print("\n");
@@ -43,11 +43,13 @@ public class SudokuSolver extends Sudoku {
   public class dEdge {
     dNode start, end;
     int data;
+    boolean visited;
 
     public dEdge ( dNode a, dNode b, int in ) {
       start = a;
       end = b;
       data = in;
+      visited = false;
     }
 
     public void printContent() {
@@ -74,11 +76,11 @@ public class SudokuSolver extends Sudoku {
 
 
   //Builds the decision graph based on nodes and edges of possible decisions
-  public List<dNode> buildGraph(Sudoku game) {
+  public Queue<dEdge> buildGraph(Sudoku game) {
 
     //Initializing structures
     Queue<dNode> nodes = new LinkedList<dNode>();
-    List<dNode> ret = new ArrayList<dNode>();
+    Queue<dEdge> ret = new LinkedList<dEdge>();
 
     Coordinate curr;
     int nodecnt = 0;
@@ -91,8 +93,8 @@ public class SudokuSolver extends Sudoku {
           emptycnt++;
           List<Integer> in = new ArrayList<Integer>();
           for( int k = 1; k < numRows+1; k++ ) {
-            if( isValid( curr.x, curr.y, k ) )
-              in.add(k);
+            if( isValid( curr.x, curr.y, k ) ) 
+              in.add(k);            
           }
           dNode node = new dNode(curr, in);
           //node.printContent();
@@ -101,69 +103,36 @@ public class SudokuSolver extends Sudoku {
         }
       }
     }
+
     //Creates edges for each consecutive node in queue
     dNode current, next;
     int edgecnt = 0;
     while( nodes.size() > 0 ) {
       current = nodes.poll();
-      List<dEdge> curredges = new ArrayList<dEdge>();
 
       for( Integer i : current.inputs ) {
         next = nodes.peek();
         
         dEdge edge = new dEdge( current, next, i );
+        ret.add(edge);
         edgecnt++;
         //edge.printContent();
-        curredges.add(edge);
       }
-      current.edges = curredges;
-      ret.add(current);
     }
     System.out.println(emptycnt + " empty spots.");
-    System.out.println("Created " + nodecnt + " nodes and " + edgecnt+ " edges.");
+    System.out.println("Created " + nodecnt + " nodes and " + edgecnt + " edges.");
     return ret;
   }
 
   //DFS traversal of the nodes in te graph
-  public List<dEdge> dfs(Sudoku game, List<dNode> graph) {
+  public List<dEdge> dfs(Sudoku game, Queue<dEdge> graph) {
     Deque<dNode> stack = new ArrayDeque<dNode>();
     List<dEdge> ret = new ArrayList<dEdge>();
-
-    dNode start;
-    start = graph.get(0);
-    start.visited = true;
-    stack.push(start);
     
-    while( stack.size() > 0 ) {
-       dNode next = stack.pop();
-      
-       for(int i = 0; i < next.edges.size(); i++ ) {
-         if( game.isValid(next.c.x, next.c.y, next.edges.get(i).data)) {
-           game.setBoard(next.c.x, next.c.y, next.edges.get(i).data);
-           System.out.println("Added " + next.edges.get(i).data + " in (" + (next.c.x+1) + ", " + (next.c.y+1) + ")");
-           break;
-         }
-       }
-
-       for(int i = 0; i < next.edges.size(); i++) {
-         dNode neighbor = next.edges.get(i).end;
-
-         if( neighbor == null ) {
-           System.out.println("broke");
-           break;
-         }
-         if( !neighbor.visited && game.isValid(neighbor.c.x, neighbor.c.y, next.edges.get(i).data )) {
-           game.setBoard(neighbor.c.x, neighbor.c.y, next.edges.get(i).data);
-           System.out.println("Added " + next.edges.get(i).data + " in (" + (neighbor.c.x+1) + ", " + (neighbor.c.y+1) + ")");
-           neighbor.visited = true;
-           next.edges.get(i).printContent();
-           ret.add(next.edges.get(i));
-           stack.push(neighbor);
-         }
-
-       }
-    }
-
+    dNode first, next, neighbor;
+    first = graph.poll()
+    first.visited = true;
+    game.setBoard( first.start.c.x, first.start.c.y, first.data );
     return ret;
 
   }
@@ -174,7 +143,7 @@ public class SudokuSolver extends Sudoku {
     File file = new File(args[0]);
     SudokuSolver ss = new SudokuSolver();
   
-    List<dNode> graph;
+    Queue<dEdge> graph;
     List<dEdge> solutionSet;
 
     boolean loadSuccess;
