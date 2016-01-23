@@ -88,6 +88,8 @@ public class SudokuSolver extends Sudoku {
     Queue<dNode> nodes = new LinkedList<dNode>();
     Queue<dNode> retnodes = new LinkedList<dNode>();
 
+    dNode finaln = null;
+
     Coordinate curr;
     int nodecnt = 0;
     int emptycnt = 0;
@@ -104,9 +106,10 @@ public class SudokuSolver extends Sudoku {
           }
           for( int m = 0; m < in.size(); m++ ) {
             dNode node = new dNode(curr, in);
-            //node.printContent();
+            node.printContent();
             nodecnt++;
             nodes.add(node);
+            finaln = node;
           }
         }
       }
@@ -124,25 +127,39 @@ public class SudokuSolver extends Sudoku {
       next = nodes.peek();
       if( current == null )
         break;
+      /*if( next == null ) {
+        List<dEdge> finaledges = new ArrayList<dEdge>();
+        for( Integer i : current.inputs ) { 
+         dEdge edge = new dEdge( current, null, i );
+         finaledges.add(edge);
+         edgecnt++;
+         System.out.print("final! ");
+         edge.printContent();
+        }
+        current.edges = finaledges;
+        break;
+      }*/
+      copies.add(current);
+      retnodes.add(current);
+      while( current.c.x == next.c.x && current.c.y == next.c.y && next != null ) {
+        nodes.poll();
+        current = next;
+        next = nodes.peek();
+        copies.add(current);
+        retnodes.add(current);
+        //next.printContent();
+      }
       if( next == null ) {
         List<dEdge> finaledges = new ArrayList<dEdge>();
         for( Integer i : current.inputs ) { 
          dEdge edge = new dEdge( current, null, i );
          finaledges.add(edge);
          edgecnt++;
+         System.out.print("final! ");
          edge.printContent();
         }
         current.edges = finaledges;
         break;
-      }
-      copies.add(current);
-      retnodes.add(current);
-      while( current.c.x == next.c.x && current.c.y == next.c.y ) {
-        nodes.poll();
-        current = next;
-        next = nodes.peek();
-        copies.add(current);
-        retnodes.add(current);
       }
       List<dEdge> edgelist = new ArrayList<dEdge>();
       for( Integer i : current.inputs ) { 
@@ -178,6 +195,7 @@ public class SudokuSolver extends Sudoku {
       for( int i = 0; i < current.edges.size(); i++ ) {
         if( !current.edges.get(i).visited && isValid( current.c.x, current.c.y, current.edges.get(i).data ) ) {
           game.setBoard( current.c.x, current.c.y, current.edges.get(i).data );
+          System.out.println("added move");
           current.edges.get(i).visited = true;
           current.edges.get(i).printContent();
           ret.add(current.edges.get(i));
@@ -192,7 +210,8 @@ public class SudokuSolver extends Sudoku {
       }
       for( int j = 0; j < current.edges.size(); j++ ) {
         neighbor = current.edges.get(j).end;
-        if( !neighbor.visited ) {
+        //neighbor.printContent();
+        if( !neighbor.visited  ) {
           neighbor.visited = true;
           stack.push(neighbor);
         }
