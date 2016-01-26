@@ -74,6 +74,16 @@ public class Sudoku {
     if( fixed[row][col] == 0 && theBoard[row][col] != 0 ) {
       numSet[theBoard[row][col]]--;
       theBoard[row][col] = 0;
+      numSet[0]++;
+    }
+  }
+  
+  //Clears the board
+  public void clearBoard() {
+    for( int i = 0; i < numRows; i++ ) {
+      for( int j = 0; j < numCols; j++ ) {
+        clearCell(i,j);
+      }
     }
   }
 
@@ -337,6 +347,7 @@ public class Sudoku {
     if( loadSuccess ) {
       System.out.println("\n"+"Welcome to Sudoku!");
       game.printBoard();
+      //game.toString();
       
       //Starts a time counter
       final long startTime = System.currentTimeMillis();
@@ -369,6 +380,8 @@ public class Sudoku {
         else  
             game.printBoard();
 
+        //game.toString();
+        //game.clearBoard();
         //game.toString();
       }
 
