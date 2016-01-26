@@ -4,6 +4,7 @@
  *
  * TODO:
  * - Solver
+ * - Main class
  * - GUI / Animations
  * - Puzzle generator
  * - Save to file
