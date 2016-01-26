@@ -369,7 +369,7 @@ public class Sudoku {
         else  
             game.printBoard();
 
-        game.toString();
+        //game.toString();
       }
 
       //Time calculations
