@@ -22,12 +22,24 @@ public class SudokuSolver extends Sudoku {
     //List of neighbors
     List<dNode> neighbors;
 
+    dNode prev; 
+
     //Constructor
     public dNode( Coordinate coord, int datain ) {
       c = coord;
       data = datain;
       neighbors = new ArrayList<dNode>();
       visited = false;
+    }
+
+    //Clone
+    public dNode clone() {
+      Coordinate tempc = new Coordinate(this.c.x, this.c.y);
+      int datain = this.data;
+      dNode node = new dNode( tempc, datain );
+      //System.out.print("Copied: ");
+      //node.printContent();
+      return node;
     }
 
     //Prints the content of the node for debugging
@@ -53,6 +65,17 @@ public class SudokuSolver extends Sudoku {
     public void removeNode( Sudoku game ) {
       if( this.data != 0 )
         game.clearCell( this.c.x, this.c.y );
+    }
+    
+    //Helper method that iteratively adds the path to the graph
+    public void addPath( Sudoku game ) {
+      dNode curr = this;
+      while( curr.data != 0 && curr.isValidNode(game) ) {
+        curr.addNode(game);
+        curr.printContent();
+        curr = curr.prev;
+      }
+      System.out.println("finished path add");
     }
   }
   
@@ -116,8 +139,17 @@ public class SudokuSolver extends Sudoku {
     index = 0;
     while( index < decisionMap.size()-1 ) { 
       List<dNode> nlist = decisionMap.get(index+1);
+      //System.out.println("init nlist size: " + nlist.size()); 
       for( dNode node : decisionMap.get(index) ) {
-        node.neighbors = nlist;
+        //node.neighbors = nlist; //Shallow copy
+        System.out.print("Curr: ");
+        node.printContent();
+        System.out.println("Going to add " + nlist.size() + " neighbors");
+        for( dNode listnode : nlist ) {
+          dNode temp = listnode.clone();
+          temp.printContent();
+          node.neighbors.add(temp); //deep copy
+        }
       }
       index++;
     } 
@@ -144,11 +176,13 @@ public class SudokuSolver extends Sudoku {
     while( stack.size() > 0 ) {
       current = stack.pop();
 
-      if( current.visited ) {
-        current.removeNode(game);
-      }
+      //game.clearBoard();
+      //current.addPath(game);
+
+      //game.printBoard();
 
       if( current.isValidNode( game ) ) {
+        //game.clearBoard();
         current.addNode(game);
         game.printBoard();
       }
@@ -157,18 +191,22 @@ public class SudokuSolver extends Sudoku {
         game.printBoard();
         return;
       }
-
+      System.out.println(current.neighbors.size() ); 
       for( int i = 0; i < current.neighbors.size(); i++ ) {
         neighbor = current.neighbors.get(i);
-        //neighbor.printContent();
+        neighbor.printContent();
+        System.out.println(neighbor.visited);
+        System.out.println("nsize: " + neighbor.neighbors.size());
         if( !neighbor.visited ) {
           neighbor.visited = true;
+          neighbor.prev = current;
           //neighbor.printContent();
           stack.push(neighbor);
-        }
+        } 
       }
     }
     System.out.println("Failed.");
+
   } 
 
   //Main driver
@@ -186,5 +224,6 @@ public class SudokuSolver extends Sudoku {
   
     graph = ss.buildGraph(game);
     ss.dfs(game, graph);
+
   }
 }
