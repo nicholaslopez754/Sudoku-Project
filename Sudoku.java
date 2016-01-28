@@ -3,8 +3,8 @@
  * Date: 11/22/2015
  *
  * TODO:
- * - Solver
  * - Main class
+ * - Map for the subset arrays
  * - GUI / Animations
  * - Puzzle generator
  * - Save to file
@@ -24,7 +24,7 @@ public class Sudoku {
   public static int numMoves;
 
   //Subsets of the board matrix
-  public static Set<Integer> s1, s2, s3, s4, s5, s6, s7, s8, s9;
+  public static int[] s1, s2, s3, s4, s5, s6, s7, s8, s9;
 
   //Constructor
   public Sudoku() {
@@ -36,15 +36,16 @@ public class Sudoku {
     numMoves = 0;
 
     //Instantiates the subsets
-    s1 = new HashSet<Integer>();
-    s2 = new HashSet<Integer>();
-    s3 = new HashSet<Integer>();
-    s4 = new HashSet<Integer>();
-    s5 = new HashSet<Integer>();
-    s6 = new HashSet<Integer>();
-    s7 = new HashSet<Integer>();
-    s8 = new HashSet<Integer>();
-    s9 = new HashSet<Integer>();
+    s1 = new int[numRows+1];
+    s2 = new int[numRows+1];
+    s3 = new int[numRows+1];
+    s4 = new int[numRows+1];
+    s5 = new int[numRows+1];
+    s6 = new int[numRows+1];
+    s7 = new int[numRows+1];
+    s8 = new int[numRows+1];
+    s9 = new int[numRows+1];
+
 
     //Fills matrix with 0's as representation for empty
     for(int i = 0; i < numRows; i++) {
@@ -55,26 +56,14 @@ public class Sudoku {
     } 
   }
   
-  //Clone method for deep copies
-  public Sudoku clone() {
-    Sudoku copy = new Sudoku();
-    for( int i = 0; i < numRows; i ++ ) {
-      for( int j = 0; j < numCols; j++ ) {
-        copy.theBoard[i][j] = this.theBoard[i][j];
-      }
-    }
-    return copy;
-  }
-
   //Sets the board with given args
   public void setBoard(int row, int col, int in) {
-    //char temp = intToChar(in);
     int temp;
-    if( fixed[row][col] == 0 ) { //Here
-      numSet[theBoard[row][col]]--; //Here
-      theBoard[row][col] =  in; //Here
-      numSet[in]++;
+    if( fixed[row][col] == 0 ) { 
+      numSet[theBoard[row][col]]--; 
       addToSet(row,col,in);
+      theBoard[row][col] =  in; 
+      numSet[in]++;
     }
     else
       System.out.println("Invalid move; this cell cannot be changed.");
@@ -82,10 +71,12 @@ public class Sudoku {
 
   //Clears the cell in the board
   public void clearCell(int row, int col) { 
-    if( fixed[row][col] == 0 && theBoard[row][col] != 0 ) {
+    if( fixed[row][col] == 0 ) {
       numSet[theBoard[row][col]]--;
+      removeFromSet(row,col);
       theBoard[row][col] = 0;
       numSet[0]++;
+      //removeFromSet(row,col);
     }
   }
   
@@ -110,7 +101,7 @@ public class Sudoku {
   //Checks the row for valid move
   public boolean checkRow(int row, int in) {
     for(int i = 0; i < numRows; i++) {
-      if( theBoard[row][i] == in ) { //Here
+      if( theBoard[row][i] == in && in != 0 ) { 
         //System.out.println("Invalid move; input number exists in this row.");
         return false;
       }
@@ -121,7 +112,7 @@ public class Sudoku {
   //Checks the column for valid move
   public boolean checkColumn(int col, int in) {
     for(int i = 0; i < numCols; i++) {
-      if( theBoard[i][col] == in ) { //Here
+      if( theBoard[i][col] == in && in != 0 ) { 
         //System.out.println("Invalid move; input number exists in this column");
         return false; 
       }
@@ -133,6 +124,7 @@ public class Sudoku {
   public void updateBoard(int row, int col, int in) {
     this.setBoard(row,col,in);
     this.printBoard();
+    this.toString();
   }
 
   //Method to print the ASCII game board
@@ -171,59 +163,91 @@ public class Sudoku {
       System.out.println("Number of " + i + ": " + numSet[i]);
 
     System.out.println("\nNumber of moves taken so far: " + numMoves + "\n");
+
+    System.out.print("\ns1: ");
+    for( int i : s1 )
+      System.out.print(i + " ");
+    System.out.print("\ns2: ");
+    for( int i : s2 )
+      System.out.print(i + " ");
+    System.out.print("\ns3: ");
+    for( int i : s3 )
+      System.out.print(i + " ");
+    System.out.print("\ns4: ");
+    for( int i : s4 )
+      System.out.print(i + " ");
+    System.out.print("\ns5: ");
+    for( int i : s5 )
+      System.out.print(i + " ");
+    System.out.print("\ns6: ");
+    for( int i : s6 )
+      System.out.print(i + " ");
+    System.out.print("\ns7: ");
+    for( int i : s7 )
+      System.out.print(i + " ");
+    System.out.print("\ns8: ");
+    for( int i : s8 )
+      System.out.print(i + " ");
+    System.out.print("\ns9: ");
+    for( int i : s9 )
+      System.out.print(i + " ");
+    System.out.print("\n\n");
     return null;
+    
   }
 
   /* Checks if the element exists in the proper set
    * Returns true if it does not belong to its set 
    */
   public boolean checkSet(int row, int col, int in) {
-    //row -= 1;
-    //col -= 1;
+
+    if( in == 0 )
+      return true;
+
     boolean flag = true;
     //Set 1
-    if( 0 <= row && row < 3 && 0 <= col && col < 3) { 
-      if( s1.contains(in) ) 
+    if( 0 <= row && row < 3 && 0 <= col && col < 3 ) { 
+      if( s1[in] == 1 ) 
         flag = false;
     }
     //Set 2
-    else if( 0 <= row && row < 3 && 3 <= col && col < 6) {
-      if( s2.contains(in) ) 
+    else if( 0 <= row && row < 3 && 3 <= col && col < 6 ) {
+      if( s2[in] == 1 ) 
         flag = false;
     }
     //Set 3
-    else if( 0 <= row && row < 3 && 6 <= col && col < 9) {
-      if( s3.contains(in) ) 
+    else if( 0 <= row && row < 3 && 6 <= col && col < 9 ) {
+      if( s3[in] == 1 ) 
         flag = false;
     }
     //Set 4
-    else if( 3 <= row && row < 6 && 0 <= col && col < 3) {
-      if( s4.contains(in) ) 
+    else if( 3 <= row && row < 6 && 0 <= col && col < 3 ) {
+      if( s4[in] == 1 ) 
         flag = false;
     }
     //Set 5
-    else if( 3 <= row && row < 6 && 3 <= col && col < 6) {
-      if( s5.contains(in) ) 
+    else if( 3 <= row && row < 6 && 3 <= col && col < 6 ) {
+      if( s5[in] == 1 ) 
         flag = false;
     }
     //Set 6
-    else if( 3 <= row && row < 6 && 6 <= col && col < 9) {
-      if( s6.contains(in) ) 
+    else if( 3 <= row && row < 6 && 6 <= col && col < 9 ) {
+      if( s6[in] == 1 ) 
         flag = false;
     }
     //Set 7
-    else if( 6 <= row && row < 9 && 0 <= col && col < 3) {
-      if( s7.contains(in) ) 
+    else if( 6 <= row && row < 9 && 0 <= col && col < 3 ) {
+      if( s7[in] == 1 ) 
         flag = false;
     }
     //Set 8
-    else if( 6 <= row && row < 9 && 3 <= col && col < 6) {
-      if( s8.contains(in) ) 
+    else if( 6 <= row && row < 9 && 3 <= col && col < 6 ) {
+      if( s8[in] == 1 ) 
         flag = false;
     }
     //Set 9
     else {
-      if( s9.contains(in) ) 
+      if( s9[in] ==1  ) 
         flag = false;
     }
 
@@ -242,64 +266,106 @@ public class Sudoku {
 
   //Adds the element to the proper set
   public void addToSet(int row, int col, int in) {
-    //row -= 1;
-    //col -= 1;
     //Set 1
+    if( in == 0 )
+      return;
     if( 0 <= row && row < 3 && 0 <= col && col < 3) { 
-      if( theBoard[row][col] != 0 )
-        s1.remove(theBoard[row][col]);
-      s1.add(in);
+      if( theBoard[row][col] != 0 ) {
+        System.out.println("here!");
+        s1[theBoard[row][col]] = 0;
+      }
+      s1[in] = 1;
     }
     //Set 2
     else if( 0 <= row && row < 3 && 3 <= col && col < 6) {
       if( theBoard[row][col] != 0 )
-        s2.remove(theBoard[row][col]);
-      s2.add(in);
+        s2[theBoard[row][col]] = 0;
+      s2[in] = 1;
     }
     //Set 3
     else if( 0 <= row && row < 3 && 6 <= col && col < 9) {
       if( theBoard[row][col] != 0 )
-        s3.remove(theBoard[row][col]);
-      s3.add(in);
+        s3[theBoard[row][col]] = 0;
+      s3[in] = 1;
     }
     //Set 4
     else if( 3 <= row && row < 6 && 0 <= col && col < 3) {
       if( theBoard[row][col] != 0 )
-        s4.remove(theBoard[row][col]);
-      s4.add(in);
+        s4[theBoard[row][col]] = 0;
+      s4[in] = 1;
     }
     //Set 5
     else if( 3 <= row && row < 6 && 3 <= col && col < 6) {
       if( theBoard[row][col] != 0 )
-        s5.remove(theBoard[row][col]);
-      s5.add(in);
+        s5[theBoard[row][col]] = 0;
+      s5[in] = 1;
     }
     //Set 6
     else if( 3 <= row && row < 6 && 6 <= col && col < 9) {
       if( theBoard[row][col] != 0 )
-        s6.remove(theBoard[row][col]);
-      s6.add(in);
+        s6[theBoard[row][col]] = 0;
+      s6[in] = 1;
     }
     //Set 7
     else if( 6 <= row && row < 9 && 0 <= col && col < 3) {
       if( theBoard[row][col] != 0 )
-        s7.remove(theBoard[row][col]);
-      s7.add(in);    
+        s7[theBoard[row][col]] = 0;
+      s7[in] = 1;
+  
     }
     //Set 8
     else if( 6 <= row && row < 9 && 3 <= col && col < 6) {
       if( theBoard[row][col] != 0 )
-        s8.remove(theBoard[row][col]);
-      s8.add(in);       
+        s8[theBoard[row][col]] = 0;
+      s8[in] = 1;     
     }
     //Set 9
     else {
       if( theBoard[row][col] != 0 )
-        s9.remove(theBoard[row][col]);
-      s9.add(in);       
+        s9[theBoard[row][col]] = 0;
+      s9[in] = 1;    
     }
   }
 
+  //Removes the element from the proper set
+  public void removeFromSet(int row, int col) {
+    //Set 1
+    if( 0 <= row && row < 3 && 0 <= col && col < 3) { 
+        s1[theBoard[row][col]] = 0;
+    }
+    //Set 2
+    else if( 0 <= row && row < 3 && 3 <= col && col < 6) {
+        s2[theBoard[row][col]] = 0;
+    }
+    //Set 3
+    else if( 0 <= row && row < 3 && 6 <= col && col < 9) {
+        s3[theBoard[row][col]] = 0;
+    }
+    //Set 4
+    else if( 3 <= row && row < 6 && 0 <= col && col < 3) {
+        s4[theBoard[row][col]] = 0;
+    }
+    //Set 5
+    else if( 3 <= row && row < 6 && 3 <= col && col < 6) {
+        s5[theBoard[row][col]] = 0;
+    }
+    //Set 6
+    else if( 3 <= row && row < 6 && 6 <= col && col < 9) {
+        s6[theBoard[row][col]] = 0;
+    }
+    //Set 7
+    else if( 6 <= row && row < 9 && 0 <= col && col < 3) {
+        s7[theBoard[row][col]] = 0; 
+    }
+    //Set 8
+    else if( 6 <= row && row < 9 && 3 <= col && col < 6) {
+        s8[theBoard[row][col]] = 0;   
+    }
+    //Set 9
+    else {
+        s9[theBoard[row][col]] = 0;      
+    }
+  }
   /* Load from a text file that contains 81 integers. 
    * Each integer will fill the next spot in the row 
    * until the board is filled. 
@@ -321,8 +387,11 @@ public class Sudoku {
               scanner.close();
               return false;
             }
-            else
-              this.setBoard(i, j, temp);
+            else {
+              if( !this.isValid( i, j, temp ) )
+                return false;
+              this.setBoard(i,j,temp);
+            }
           }
         }
       }
@@ -342,10 +411,15 @@ public class Sudoku {
     }
   }
   
-  //Solver
+  /* Recursive method that utilizing the backtracking
+   * algorithm */
   public boolean backTrack() {
+
+    //Set coordinates to an initial state
     int r = -1;
     int c = -1;
+
+    //Attempt to find an unfilled cell
     for( int i = 0; i < numRows; i++ ) {
       for( int j = 0; j < numCols; j++ ) {
         if( theBoard[i][j] == 0 ) {
@@ -354,19 +428,28 @@ public class Sudoku {
         }
       }
     }
+
+    //If none found, return
     if( r == -1 && c == -1 )
       return true;
+
+    //Loop through possible values
     for( int i = 1; i < numRows+1; i++ ) {
-      //printBoard();
+
+      //If the value at the coordinates is valid
       if( isValid(r, c, i ) ) {
         setBoard(r, c, i);
-        printBoard();
+
+        //Recurse
         if( backTrack() )
           return true;
-
+    
+        //Remove unwanted cell
         clearCell(r, c);
       }
     }
+
+    //Return false if not found
     return false;
   }
 
@@ -375,6 +458,12 @@ public class Sudoku {
     Sudoku game = new Sudoku();
     Scanner sc = new Scanner(System.in);
     File file = new File(args[0]);
+
+    if( args.length != 2 ) {
+      System.out.println("\n\t Invalid usage; requires 2 arguments.");
+      System.out.println("\t'java Sudoku [file] [mode: play, solve]'\n");
+      return;
+    }
 
     int row, col, input;
     boolean loadSuccess;
@@ -387,7 +476,6 @@ public class Sudoku {
     if( loadSuccess ) {
       System.out.println("\n"+"Welcome to Sudoku!");
       game.printBoard();
-      //game.toString();
       
       //Starts a time counter
       final long startTime = System.currentTimeMillis();
@@ -422,10 +510,6 @@ public class Sudoku {
           }
           else  
             game.printBoard();
-
-        //game.toString();
-        //game.clearBoard();
-        //game.toString();
         }
       }
 
@@ -433,6 +517,7 @@ public class Sudoku {
         System.out.println("Solution:");
         solved = game.backTrack();
         game.printBoard();
+        //game.toString();
       }
 
       if( solved ) {

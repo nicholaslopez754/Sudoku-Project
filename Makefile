@@ -5,8 +5,7 @@ JC = javac
 	$(JC) $*.java
 
 CLASSES = \
-	Sudoku.java \
-	SudokuSolver.java \
+	Sudoku.java 
 
 default: classes
 
