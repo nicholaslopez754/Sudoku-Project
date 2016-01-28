@@ -29,7 +29,7 @@ public class Sudoku {
   //Constructor
   public Sudoku() {
 
-    //Instantiates the board for a char matrix
+    //Instantiates the board for a matrix
     theBoard = new int[numRows][numCols];
     fixed = new int[numRows][numCols];
     numSet = new int[numRows+1];
@@ -55,6 +55,17 @@ public class Sudoku {
     } 
   }
   
+  //Clone method for deep copies
+  public Sudoku clone() {
+    Sudoku copy = new Sudoku();
+    for( int i = 0; i < numRows; i ++ ) {
+      for( int j = 0; j < numCols; j++ ) {
+        copy.theBoard[i][j] = this.theBoard[i][j];
+      }
+    }
+    return copy;
+  }
+
   //Sets the board with given args
   public void setBoard(int row, int col, int in) {
     //char temp = intToChar(in);
@@ -330,6 +341,34 @@ public class Sudoku {
       return false;
     }
   }
+  
+  //Solver
+  public boolean backTrack() {
+    int r = -1;
+    int c = -1;
+    for( int i = 0; i < numRows; i++ ) {
+      for( int j = 0; j < numCols; j++ ) {
+        if( theBoard[i][j] == 0 ) {
+          r = i;
+          c = j;
+        }
+      }
+    }
+    if( r == -1 && c == -1 )
+      return true;
+    for( int i = 1; i < numRows+1; i++ ) {
+      //printBoard();
+      if( isValid(r, c, i ) ) {
+        setBoard(r, c, i);
+        printBoard();
+        if( backTrack() )
+          return true;
+
+        clearCell(r, c);
+      }
+    }
+    return false;
+  }
 
   /* Main driver */
   public static void main(String[] args) {
@@ -339,6 +378,7 @@ public class Sudoku {
 
     int row, col, input;
     boolean loadSuccess;
+    boolean solved = false;
 
     //Sets the boolean if load was successful
     loadSuccess = game.loadFromFile(file);
@@ -352,48 +392,69 @@ public class Sudoku {
       //Starts a time counter
       final long startTime = System.currentTimeMillis();
 
-      //Runs until the board is full with valid moves
-      while(true) {
-        System.out.println("Enter a row number (1-9)");
-        row = sc.nextInt()-1;
-        if( row < 0 || row > 8 )
-          continue;
+      if( args[1].equals("play") ) {
+        //Runs until the board is full with valid moves
+        while(true) {
+          System.out.println("Enter a row number (1-9)");
+          row = sc.nextInt()-1;
+          if( row < 0 || row > 8 )
+            continue;
 
-        System.out.println("Enter a column number (1-9)");
-        col = sc.nextInt()-1;
-        if( col < 0 || col > 8 )
-          continue;
+          System.out.println("Enter a column number (1-9)");
+          col = sc.nextInt()-1;
+          if( col < 0 || col > 8 )
+            continue;
 
-        System.out.println("Enter a number to place (1-9)");
-        input = sc.nextInt();
-        if( input < 1 || input > 9 )
-          continue;
+          System.out.println("Enter a number to place (1-9)");
+          input = sc.nextInt();
+          if( input < 1 || input > 9 )
+            continue;
         
-        numMoves++;
+          numMoves++;
 
-        //Updates the game board & prints
-        if( game.isValid(row, col, input) ) {
-          game.updateBoard(row, col, input);
-          if( game.isFull() )
-             break;
-        }
-        else  
+          //Updates the game board & prints
+          if( game.isValid(row, col, input) ) {
+            game.updateBoard(row, col, input);
+            if( game.isFull() ) {
+              solved = true;
+              break;
+            }
+          }
+          else  
             game.printBoard();
 
         //game.toString();
         //game.clearBoard();
         //game.toString();
+        }
       }
 
-      //Time calculations
-      final long endTime = System.currentTimeMillis();
-      final long elapsedTime = endTime - startTime;
-      int seconds = (int) (elapsedTime/1000) % 60;
-      int minutes = (int) (elapsedTime/(1000*60)) % 60;
+      if( args[1].equals("solve") ) {
+        System.out.println("Solution:");
+        solved = game.backTrack();
+        game.printBoard();
+      }
 
-      System.out.println("Finished with " + numMoves + " moves in " +
-                         minutes + " minutes and " + seconds + " seconds!\n");
-      sc.close();
+      if( solved ) {
+        //Time calculations
+        final long endTime = System.currentTimeMillis();
+        final long elapsedTime = endTime - startTime;
+        int seconds = (int) (elapsedTime/1000) % 60;
+        int minutes = (int) (elapsedTime/(1000*60)) % 60;
+        
+        if( args[1].equals("play") ) {
+          System.out.println("Finished with " + numMoves + " moves in " +
+                          minutes + " minutes and " + seconds + " seconds!\n");
+        }
+        if( args[1].equals("solve") ) {
+          System.out.println("Algorithm generated this solution in " + elapsedTime + "ms!\n");
+        }
+        sc.close();
+      }
+      else {
+        System.out.println("Failed to solve!\n");
+      }
     }
+
   }
 }
