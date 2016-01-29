@@ -27,16 +27,20 @@ public class SudokuController extends JFrame {
     
 
     JPanel buttonContainer = new JPanel();
+    JButton playBtn = new JButton("Play");
     JButton resetBtn = new JButton("Reset");
     JButton loadBtn = new JButton("Load");
     JButton solveBtn = new JButton("Solve");
 
     //Add listeners
+    playBtnListener pblistener = new playBtnListener();
+    playBtn.addActionListener(pblistener);
     resetBtnListener rblistener = new resetBtnListener();
     resetBtn.addActionListener(rblistener);
     solveBtnListener sblistener = new solveBtnListener();
     solveBtn.addActionListener(sblistener);
     //Add buttons to the container
+    buttonContainer.add(playBtn);
     buttonContainer.add(resetBtn);
     buttonContainer.add(solveBtn);
 
@@ -74,6 +78,15 @@ public class SudokuController extends JFrame {
     }
   }
 
+  //Button listener for the play button
+  class playBtnListener implements ActionListener {
+    public void actionPerformed(ActionEvent e) {
+      game.clearGame();
+      repaint();
+      game.playRandom(30);
+      repaint();
+    }
+  }
   //Button listener for the solve button
   class solveBtnListener implements ActionListener {
     public void actionPerformed(ActionEvent e) {
@@ -83,18 +96,19 @@ public class SudokuController extends JFrame {
         repaint();
     }
   }
+  
 
   class BoardCell extends JPanel {
     private int row;
     private int col;
-    //private int data;
 
-    //private int data = game.theBoard[row][col];
+
     BoardCell(int r, int c) {
       row = r;
       col = c;
-      //Playlistener
-      //Add mouse listener
+      PlayListener play = new PlayListener();
+      addMouseListener(play);
+      addKeyListener(play);
     }
 
     public Dimension getPreferredSize() {
@@ -117,16 +131,48 @@ public class SudokuController extends JFrame {
       }
 
       //Cell
-      g.setColor(Color.black);
-      g.drawRect(0, 0, getWidth(), getHeight());
+       g.setColor(Color.black);
+       g.drawRect(0, 0, getWidth(), getHeight());
       
       
       Font cellfont = new Font("Arial", Font.PLAIN, 36);
       g.setFont(cellfont);
       if( game.theBoard[row][col] != 0 ) {
+        g.setColor(Color.black);
         g.drawString(String.valueOf(game.theBoard[row][col]), 22,  45 );
-        //g.fillRect(0, 0, getWidth(), getHeight());
+        
       }
+
+    }
+    
+    private void makeMove( int r, int c, int d ) {
+      if( game.isValid(r, c, d) && d != 0 ) 
+        game.setBoard(r, c, d);
+      repaint();
+    }
+
+    //Listener
+    class PlayListener implements MouseListener, KeyListener {
+      public char key;
+      int in;
+
+      public void mouseClicked( MouseEvent e ) {
+        requestFocus();
+        //selected = true;
+        repaint();
+      }
+      public void mousePressed( MouseEvent e ) {}
+      public void mouseReleased( MouseEvent e ) {}
+      public void mouseEntered( MouseEvent e ) {} 
+      public void mouseExited( MouseEvent e ) {}
+
+      public void keyTyped( KeyEvent e ) {  
+        key = e.getKeyChar();
+        in = Character.getNumericValue(key);
+        makeMove(row, col, in);
+      }
+      public void keyPressed( KeyEvent e ) {} 
+      public void keyReleased( KeyEvent e ) {}
     }
   }
 

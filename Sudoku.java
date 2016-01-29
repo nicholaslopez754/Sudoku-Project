@@ -89,6 +89,15 @@ public class Sudoku {
     }
   }
 
+  public void clearGame() {
+    for( int i = 0; i < numRows; i++ ) {
+      for( int j = 0; j < numCols; j++ ) {
+        clearCell(i,j);
+        fixed[i][j] = 0;
+      }
+    }
+  }
+
   //Checks if board is filled
   public boolean isFull() {
     //Checks the amount of empty spots
@@ -271,7 +280,7 @@ public class Sudoku {
       return;
     if( 0 <= row && row < 3 && 0 <= col && col < 3) { 
       if( theBoard[row][col] != 0 ) {
-        System.out.println("here!");
+        //System.out.println("here!");
         s1[theBoard[row][col]] = 0;
       }
       s1[in] = 1;
@@ -373,6 +382,28 @@ public class Sudoku {
    * By convention, the integers will range
    * from 1-9, while an empty space is denoted by a 0
    */
+
+  public void playRandom(int n) {
+    int count = 0;
+    Random randomGen = new Random();
+    while( count < n ) {
+      int row = randomGen.nextInt(9);
+      int col = randomGen.nextInt(9);
+      int data = randomGen.nextInt(9) + 1;
+
+      if( isValid(row, col, data) && data != 0 ) {
+        setBoard(row, col, data);
+        count++;
+      }
+    }
+
+    //Copy the board into the fixed set
+    for( int i = 0; i < numRows; i++ ) {
+      for( int j = 0; j < numCols; j++ ) 
+        fixed[i][j] = theBoard[i][j];
+    }
+  }
+
   public boolean loadFromFile(File file) {
     try {
       Scanner scanner = new Scanner(file);
