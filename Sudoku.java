@@ -1,5 +1,5 @@
 /* Sudoku Game
- * Author: Nicholas Lopz
+ * Author: Nicholas Lopez
  * Date: 11/22/2015
  *
  * TODO:
@@ -92,8 +92,9 @@ public class Sudoku {
   public void clearGame() {
     for( int i = 0; i < numRows; i++ ) {
       for( int j = 0; j < numCols; j++ ) {
-        clearCell(i,j);
+        //clearCell(i,j);
         fixed[i][j] = 0;
+        clearCell(i,j);
       }
     }
   }
@@ -402,8 +403,16 @@ public class Sudoku {
       for( int j = 0; j < numCols; j++ ) 
         fixed[i][j] = theBoard[i][j];
     }
-  }
 
+    boolean solvable = backTrack();
+    if( !solvable ) {
+      clearGame();
+      playRandom(n);
+    } 
+    clearBoard();
+  }
+  
+  //Loads the game from a file
   public boolean loadFromFile(File file) {
     try {
       Scanner scanner = new Scanner(file);
@@ -441,7 +450,17 @@ public class Sudoku {
       return false;
     }
   }
-  
+ 
+  //Save the game to a file
+  public void saveToFile() throws FileNotFoundException, UnsupportedEncodingException {
+    PrintWriter writer = new PrintWriter("save.txt", "UTF-8");
+    for(int i = 0; i < numRows; i++ ) {
+      for( int j = 0; j < numCols; j++ ) {
+        writer.print(theBoard[i][j] + " ");
+      }
+    }
+  }
+
   /* Recursive method that utilizing the backtracking
    * algorithm */
   public boolean backTrack() {

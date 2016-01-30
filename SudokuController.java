@@ -30,6 +30,7 @@ public class SudokuController extends JFrame {
     JButton playBtn = new JButton("Play");
     JButton resetBtn = new JButton("Reset");
     JButton loadBtn = new JButton("Load");
+    JButton saveBtn = new JButton("Save");
     JButton solveBtn = new JButton("Solve");
 
     //Add listeners
@@ -39,10 +40,17 @@ public class SudokuController extends JFrame {
     resetBtn.addActionListener(rblistener);
     solveBtnListener sblistener = new solveBtnListener();
     solveBtn.addActionListener(sblistener);
+    loadBtnListener lblistener = new loadBtnListener();
+    loadBtn.addActionListener(lblistener);
+    saveBtnListener svblistener = new saveBtnListener();
+    saveBtn.addActionListener(svblistener);
+
     //Add buttons to the container
     buttonContainer.add(playBtn);
     buttonContainer.add(resetBtn);
     buttonContainer.add(solveBtn);
+    buttonContainer.add(loadBtn);
+    buttonContainer.add(saveBtn);
 
     JPanel displayBoard = new JPanel();
     displayBoard.setLayout(new GridLayout(game.numRows, game.numCols));
@@ -82,7 +90,7 @@ public class SudokuController extends JFrame {
   class playBtnListener implements ActionListener {
     public void actionPerformed(ActionEvent e) {
       game.clearGame();
-      repaint();
+      //repaint();
       game.playRandom(30);
       repaint();
     }
@@ -97,7 +105,48 @@ public class SudokuController extends JFrame {
     }
   }
   
+  //Button listener for the load button
+  class loadBtnListener implements ActionListener {
+    public void actionPerformed(ActionEvent e) {
+      game.clearGame();
+      boolean loadSucess = false;
+      JFileChooser fileChooser = new JFileChooser();
+      if( fileChooser.showOpenDialog(SudokuController.this) == JFileChooser.APPROVE_OPTION ) {
+        File file = fileChooser.getSelectedFile();
+        loadSuccess = game.loadFromFile(file);
+      }
+      if( loadSuccess )
+        repaint();
 
+    }
+  }
+
+  //Button listener for the save button
+  class saveBtnListener implements ActionListener {
+
+    //Save the game to a file
+    public void saveToFile() throws FileNotFoundException, UnsupportedEncodingException {
+      PrintWriter writer = new PrintWriter("save.txt", "UTF-8");
+      for(int i = 0; i < game.numRows; i++ ) {
+        for( int j = 0; j < game.numCols; j++ ) {
+          writer.print(game.theBoard[i][j]);
+          writer.print(" ");
+          //System.out.println(game.theBoard[i][j]);
+        }
+        writer.print("\n");
+      }
+      writer.close();
+    }
+
+    public void actionPerformed(ActionEvent e) {
+      try {
+        saveToFile(); 
+      } catch(FileNotFoundException ex) {
+      } catch(UnsupportedEncodingException ex) {
+      }
+    }
+  }
+  
   class BoardCell extends JPanel {
     private int row;
     private int col;
@@ -178,14 +227,11 @@ public class SudokuController extends JFrame {
 
   //Main driver
   public static void main(String[] args) {
-    File file = new File(args[0]);
-    if( args.length != 1 ) {
-      System.out.println("\n\t Usage: java SudokuController [-file]\n");
+    if( args.length != 0 ) {
+      System.out.println("\n\t Usage: java SudokuController\n");
       return;
     }
     Sudoku game = new Sudoku();
-    boolean loadSuccess = game.loadFromFile(file);
-    if( loadSuccess )
-      new SudokuController(game);
+    new SudokuController(game);
   }
 }
